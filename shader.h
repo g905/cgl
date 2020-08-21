@@ -37,7 +37,7 @@ public:
             // конвертируем в строковую переменную данные из потока
             vertexCode = vShaderStream.str();
             fragmentCode = fShaderStream.str();
-        }        catch (std::ifstream::failure& e) {
+        } catch (std::ifstream::failure& e) {
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
         }
         const char* vShaderCode = vertexCode.c_str();
@@ -85,6 +85,10 @@ public:
 
     void setFloat(const std::string& name, float value) const {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    }
+
+    void setMat4(const std::string& name, const glm::mat4& mat) const {
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
 private:
