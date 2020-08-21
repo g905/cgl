@@ -18,7 +18,11 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "stb_image.h"
 
 #include "shader.h"
@@ -64,10 +68,10 @@ int main(int argc, char** argv) {
     Shader shaderProgram("resources/shaders/vertex.vs", "resources/shaders/fragment.fs");
 
     float vertices[]{
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.55f, 0.55f,
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.55f, 0.0f,
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.55f
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f
     };
 
     unsigned int indices[]{
@@ -144,6 +148,8 @@ int main(int argc, char** argv) {
     float opacity = 0.5f;
     shaderProgram.setFloat("opacity", opacity);
 
+    unsigned int transformMatrix = glGetUniformLocation(shaderProgram.ID, "transformMatrix");
+
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
@@ -154,6 +160,12 @@ int main(int argc, char** argv) {
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
+
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        glUniformMatrix4fv(transformMatrix, 1, GL_FALSE, glm::value_ptr(trans));
 
         if (glfwGetKey(window, GLFW_KEY_UP)) {
             opacity += 0.01f;
@@ -169,6 +181,16 @@ int main(int argc, char** argv) {
 
         shaderProgram.setFloat("opacity", opacity);
         shaderProgram.use();
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+        float scale = glm::tan((float) glfwGetTime());
+        trans = glm::scale(trans, glm::vec3(scale, scale, scale));
+
+        glUniformMatrix4fv(transformMatrix, 1, GL_FALSE, glm::value_ptr(trans));
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
