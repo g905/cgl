@@ -156,7 +156,21 @@ int main(int argc, char** argv) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof (float), (void*) 0);
     glEnableVertexAttribArray(0);
 
+
+    lightShader.use();
+
+    lightShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+
+    lightShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+    lightShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+    lightShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    lightShader.setFloat("material.shininess", 32.0f);
+
+    lightShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    lightShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
     float prev = lightPos.x;
+    glm::vec3 lightColor;
     while (!glfwWindowShouldClose(window)) {
 
         lightPos.x = (sin(prev += 0.01f) * 2);
@@ -173,10 +187,19 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         lightShader.use();
-        lightShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        lightShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-        lightShader.setVec3("lightPos", lightPos);
         lightShader.setVec3("viewPos", camera.Position);
+        lightShader.setVec3("light.position", lightPos);
+
+        // Свойства света
+        lightShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f); // обратите внимание, что все цвета света установлены на полную интенсивность
+        lightShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+        lightShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        // Свойства материала
+        lightShader.setVec3("material.ambient", 0.05375f, 0.05f, 0.06625f);
+        lightShader.setVec3("material.diffuse", 0.18275f, 0.17f, 0.22525f);
+        lightShader.setVec3("material.specular", 0.332741f, 0.328634f, 0.346435f);
+        lightShader.setFloat("material.shininess", 32);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
