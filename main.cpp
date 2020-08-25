@@ -171,6 +171,9 @@ int main(int argc, char** argv) {
 
     float prev = lightPos.x;
     glm::vec3 lightColor;
+
+    glm::vec3 cprev = camera.Front;
+    cprev.z = 0.0f;
     while (!glfwWindowShouldClose(window)) {
 
         lightPos.x = (sin(prev += 0.005f) * 2);
@@ -182,7 +185,11 @@ int main(int argc, char** argv) {
         lastFrame = currentFrame;
 
         processInput(window);
-
+        //camera faced to 0,0,0
+        /*camera.Position.x = sin(cprev.x -= 0.05f) * 8.0f;
+        camera.Position.z = cos(cprev.z -= 0.05f) * 8.0f;
+        camera.Position.y = sin(cprev.y -= 0.02f);
+        camera.Front = glm::normalize(glm::vec3(0.0f) - camera.Position);*/
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -239,9 +246,8 @@ int main(int argc, char** argv) {
 };
 
 void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE))
         glfwSetWindowShouldClose(window, GL_TRUE);
-    }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
