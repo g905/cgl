@@ -32,6 +32,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 unsigned int loadTexture(char const* path);
 
 const unsigned int SCR_WIDTH = 800;
@@ -45,6 +47,8 @@ bool firstMouse = true;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+bool spotLightOn = false;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
@@ -77,6 +81,7 @@ int main(int argc, char** argv) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         cout << "Failed to init GLAD" << endl;
@@ -231,12 +236,12 @@ int main(int argc, char** argv) {
         lightShader.setFloat("material.shininess", 64.0f);
 
         lightShader.setVec3("dirLight.direction", 0.0f, 1.0f, 0.0f);
-        lightShader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        lightShader.setVec3("dirLight.ambient", 0.0f, 0.0f, 0.0f);
         //lightShader.setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.2f);
         //lightShader.setVec3("dirLight.specular", 0.2f, 0.2f, 0.2f);
 
         for (int i = 0; i < 4; i++) {
-            lightShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", 0.2f, 0.2f, 0.2f);
+            lightShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", 0.0f, 0.0f, 0.0f);
             if (i == 2) {
                 lightShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i] + lightPos);
             } else {
@@ -253,8 +258,13 @@ int main(int argc, char** argv) {
         lightShader.setVec3("spotLight.position", camera.Position);
         lightShader.setVec3("spotLight.direction", camera.Front);
         lightShader.setVec3("spotLight.ambient", 0.2f, 0.2f, 0.2f);
-        lightShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-        lightShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        if (spotLightOn) {
+            lightShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+            lightShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        } else {
+            lightShader.setVec3("spotLight.diffuse", 0.0f, 0.0f, 0.0f);
+            lightShader.setVec3("spotLight.specular", 0.0f, 0.0f, 0.0f);
+        }
         lightShader.setFloat("spotLight.constant", 1.0f);
         lightShader.setFloat("spotLight.linear", 0.09f);
         lightShader.setFloat("spotLight.quadratic", 0.032f);
@@ -351,6 +361,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_F && action == GLFW_PRESS)
+        spotLightOn = !spotLightOn;
 }
 
 unsigned int loadTexture(char const* path) {
